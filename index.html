@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英語單字挑戰賽 1-311 完整音效版</title>
+    <title>英語單字挑戰賽 1-311 完整音效強化版</title>
     <style>
         :root { --p:#4a90e2; --s:#f5a623; --ok:#7ed321; --err:#ff5e5e; --gold:#ffd700; --dark:#2c3e50; }
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background:#f0f4f8; margin:0; padding:15px; display:flex; justify-content:center; }
@@ -32,7 +32,7 @@
         .coin-pop { position:fixed; left:50%; top:25%; font-size:3em; font-weight:bold; animation:pop 1s forwards; z-index:99; pointer-events:none; }
     </style>
 </head>
-<body>
+<body onclick="unlockAudio()">
 
 <div class="container">
     <div class="main">
@@ -70,14 +70,14 @@
 
     <div class="side">
         <div class="rank">
-            <h3>🏆 本機排行榜</h3>
+            <h3>🏆 排行榜</h3>
             <div id="rank-list">尚無紀錄</div>
         </div>
     </div>
 </div>
 
 <script>
-// --- 完整單字庫 1-311 (依據 PDF) ---
+// --- 單字庫數據庫 1-311 (略，同之前完整內容以節省長度，請確保您貼上時包含完整的 DB 陣列) ---
 const DB = [
     {id:1,w:"bad",z:"壞的"},{id:2,w:"mad",z:"生氣的"},{id:3,w:"sad",z:"難過的"},{id:4,w:"fan",z:"電扇"},{id:5,w:"man",z:"男人"},
     {id:6,w:"ham",z:"火腿"},{id:7,w:"bat",z:"球棒"},{id:8,w:"cat",z:"貓"},{id:9,w:"fat",z:"胖的"},{id:10,w:"hat",z:"帽子"},
@@ -144,20 +144,33 @@ const DB = [
     {id:311,w:"cherry",z:"櫻桃"}
 ];
 
-// --- 音效生成器 (不需外部檔案) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// --- 音效生成器 (音量大幅強化版) ---
+let audioCtx = null;
+function unlockAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } else if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
 function playBeep(type) {
+    if(!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
+    
     if(type === 'win') {
-        osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+        osc.type = 'square'; // 方波聲音更響亮
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime); // 提高基礎音量
     } else {
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime); // 低音
-        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+        osc.type = 'sawtooth'; // 鋸齒波聽起來比較不爽(符合答錯)
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
     }
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
     osc.start(); osc.stop(audioCtx.currentTime + 0.3);
 }
@@ -174,7 +187,7 @@ window.onload = () => {
 };
 
 function login() {
-    let n = prompt("輸入班級姓名：");
+    let n = prompt("請輸入班級姓名：");
     if(n) {
         user = n;
         document.getElementById('user-name').innerText = user;
@@ -188,7 +201,7 @@ function updateCoins(v) {
     coins += v; if(coins < 0) coins = 0;
     document.getElementById('coin-val').innerText = coins;
     if(v !== 0) {
-        playBeep(v > 0 ? 'win' : 'lose'); // 播放音效
+        playBeep(v > 0 ? 'win' : 'lose');
         const p = document.createElement('div');
         p.className = 'coin-pop'; p.innerText = (v>0?"+":"")+v;
         p.style.color = v>0?"var(--ok)":"var(--err)";
@@ -231,7 +244,9 @@ function switchMode(m) {
 function speak(t) { 
     synth.cancel(); 
     const u = new SpeechSynthesisUtterance(t); 
-    u.lang='en-US'; u.rate=0.7; 
+    u.lang='en-US'; 
+    u.rate=0.7; 
+    u.volume = 1.0; // 將朗讀音量調到最大
     synth.speak(u); 
 }
 
@@ -244,6 +259,7 @@ function renderMatch() {
         const d = document.createElement('div');
         d.className = 'match-card'; d.innerText = item.t;
         d.onclick = () => {
+            unlockAudio(); // 每次點擊都確保音訊鎖解開
             if(d.classList.contains('done') || picked.includes(d)) return;
             if(item.type==='en') speak(item.t);
             d.classList.add('sel'); picked.push({d, id:item.id});
@@ -275,6 +291,7 @@ function renderQuiz() {
         const b = document.createElement('button');
         b.className = "opt-btn"; b.innerText = o.w;
         b.onclick = () => {
+            unlockAudio();
             if(o.id === qTarget.id) {
                 b.classList.add('win'); updateCoins(20);
                 document.getElementById('q-msg').innerText = "Correct!";
