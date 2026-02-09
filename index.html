@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英語單字金幣爭奪戰 1-311</title>
+    <title>英語單字挑戰賽 1-311 完整音效版</title>
     <style>
         :root { --p:#4a90e2; --s:#f5a623; --ok:#7ed321; --err:#ff5e5e; --gold:#ffd700; --dark:#2c3e50; }
-        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background:#f0f4f8; margin:0; padding:20px; display:flex; justify-content:center; }
-        .container { display:flex; gap:20px; width:100%; max-width:1100px; flex-wrap:wrap; }
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background:#f0f4f8; margin:0; padding:15px; display:flex; justify-content:center; }
+        .container { display:flex; gap:15px; width:100%; max-width:1100px; flex-wrap:wrap; }
         .main { flex:3; min-width:320px; }
         .side { flex:1; min-width:250px; }
         .card { background:white; padding:20px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); margin-bottom:15px; }
         .header { background:var(--dark); color:white; display:flex; justify-content:space-between; align-items:center; padding:15px 25px; border-radius:15px; margin-bottom:15px; }
         .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; transition:0.2s; background:var(--p); color:white; }
         .btn-gold { background:var(--s); }
-        select { padding:8px; border-radius:8px; border:1px solid #ddd; font-size:16px; }
-        .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:15px; }
+        select { padding:8px; border-radius:8px; border:1px solid #ddd; font-size:16px; margin-bottom: 5px; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:10px; margin-top:15px; }
         .match-card { background:#f9f9f9; border:2px solid #eee; height:60px; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer; font-size:14px; text-align:center; padding:5px; font-weight: bold; }
         .match-card.sel { border-color:var(--p); background:#e3f2fd; }
         .match-card.done { background:#c8e6c9; opacity:0.3; pointer-events:none; }
@@ -29,7 +29,7 @@
         .rank-item { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #444; }
         .hidden { display:none !important; }
         @keyframes pop { 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-60px);} }
-        .coin-pop { position:fixed; left:50%; top:25%; font-size:3em; font-weight:bold; animation:pop 1s forwards; z-index:99; }
+        .coin-pop { position:fixed; left:50%; top:25%; font-size:3em; font-weight:bold; animation:pop 1s forwards; z-index:99; pointer-events:none; }
     </style>
 </head>
 <body>
@@ -42,14 +42,16 @@
         </div>
 
         <div class="card">
-            <select id="wk-select"></select>
-            <select id="dy-select">
-                <option value="1">星期一 (1-10)</option>
-                <option value="2">星期三 (11-20)</option>
-                <option value="3">星期五 (21-30)</option>
-            </select>
-            <button class="btn" onclick="initGame()">載入進度</button>
-            <button class="btn" style="background:#666" onclick="login()">換人玩</button>
+            <div>
+                <select id="wk-select"></select>
+                <select id="dy-select">
+                    <option value="1">星期一 (1-10)</option>
+                    <option value="2">星期三 (11-20)</option>
+                    <option value="3">星期五 (21-30)</option>
+                </select>
+                <button class="btn" onclick="initGame()">載入進度</button>
+                <button class="btn" style="background:#666" onclick="login()">換人</button>
+            </div>
             <div style="margin-top:15px;">
                 <button class="btn-gold" onclick="switchMode('match')">連連看挑戰</button>
                 <button class="btn-gold" onclick="switchMode('quiz')">聽音選單字</button>
@@ -70,13 +72,12 @@
         <div class="rank">
             <h3>🏆 本機排行榜</h3>
             <div id="rank-list">尚無紀錄</div>
-            <button onclick="if(confirm('確定清除？')) {localStorage.clear(); location.reload();}" style="margin-top:30px; font-size:10px; width:100%; background:#444; color:#ccc; border:none; cursor:pointer;">重置所有數據</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- 1-311 正確單字數據庫 ---
+// --- 完整單字庫 1-311 (依據 PDF) ---
 const DB = [
     {id:1,w:"bad",z:"壞的"},{id:2,w:"mad",z:"生氣的"},{id:3,w:"sad",z:"難過的"},{id:4,w:"fan",z:"電扇"},{id:5,w:"man",z:"男人"},
     {id:6,w:"ham",z:"火腿"},{id:7,w:"bat",z:"球棒"},{id:8,w:"cat",z:"貓"},{id:9,w:"fat",z:"胖的"},{id:10,w:"hat",z:"帽子"},
@@ -98,8 +99,8 @@ const DB = [
     {id:86,w:"inch",z:"英吋"},{id:87,w:"rich",z:"富有"},{id:88,w:"high",z:"高的"},{id:89,w:"light",z:"燈光"},{id:90,w:"night",z:"夜晚"},
     {id:91,w:"right",z:"正確"},{id:92,w:"sight",z:"視力"},{id:93,w:"phone",z:"電話"},{id:94,w:"photo",z:"照片"},{id:95,w:"she",z:"她"},
     {id:96,w:"ship",z:"船"},{id:97,w:"shop",z:"店面"},{id:98,w:"dish",z:"盤子"},{id:99,w:"fish",z:"魚"},{id:100,w:"thin",z:"瘦的"},
-    {id:101,w:"bath",z:"洗澡"},{id:102,w:"math",z:"數學"},{id:103,w:"with",z:"和...一起"},{id:104,w:"mouth",z:"嘴巴"},{id:105,w:"the",z:"這/那"},
-    {id:106,w:"than",z:"比較"},{id:107,w:"that",z:"那個"},{id:108,w:"this",z:"這個"},{id:109,w:"them",z:"他們(受格)"},{id:110,w:"who",z:"誰"},
+    {id:101,w:"bath",z:"洗澡"},{id:102,w:"math",z:"數學"},{id:103,w:"with",z:"一起"},{id:104,w:"mouth",z:"嘴巴"},{id:105,w:"the",z:"這/那"},
+    {id:106,w:"than",z:"比較"},{id:107,w:"that",z:"那個"},{id:108,w:"this",z:"這個"},{id:109,w:"them",z:"他們"},{id:110,w:"who",z:"誰"},
     {id:111,w:"why",z:"為什麼"},{id:112,w:"when",z:"何時"},{id:113,w:"which",z:"哪個"},{id:114,w:"white",z:"白色"},{id:115,w:"king",z:"國王"},
     {id:116,w:"ring",z:"戒指"},{id:117,w:"sing",z:"唱歌"},{id:118,w:"long",z:"長的"},{id:119,w:"song",z:"歌曲"},{id:120,w:"back",z:"背面"},
     {id:121,w:"pack",z:"打包"},{id:122,w:"pick",z:"撿拾"},{id:123,w:"sick",z:"生病"},{id:124,w:"duck",z:"鴨子"},{id:125,w:"boat",z:"小船"},
@@ -111,39 +112,57 @@ const DB = [
     {id:151,w:"own",z:"自己的"},{id:152,w:"low",z:"低的"},{id:153,w:"row",z:"划船"},{id:154,w:"grow",z:"成長"},{id:155,w:"slow",z:"慢的"},
     {id:156,w:"oil",z:"油"},{id:157,w:"boil",z:"沸騰"},{id:158,w:"join",z:"加入"},{id:159,w:"point",z:"分數"},{id:160,w:"noise",z:"噪音"},
     {id:161,w:"boy",z:"男孩"},{id:162,w:"joy",z:"喜悅"},{id:163,w:"toy",z:"玩具"},{id:164,w:"fail",z:"失敗"},{id:165,w:"mail",z:"郵件"},
-    {id:166,w:"nail",z:"釘子/指甲"},{id:167,w:"tail",z:"尾巴"},{id:168,w:"rain",z:"下雨"},{id:169,w:"day",z:"日子"},{id:170,w:"may",z:"可以"},
+    {id:166,w:"nail",z:"釘子"},{id:167,w:"tail",z:"尾巴"},{id:168,w:"rain",z:"下雨"},{id:169,w:"day",z:"日子"},{id:170,w:"may",z:"可以"},
     {id:171,w:"pay",z:"付費"},{id:172,w:"say",z:"說"},{id:173,w:"way",z:"道路"},{id:174,w:"Paul",z:"保羅"},{id:175,w:"cause",z:"原因"},
-    {id:176,w:"dawn",z:"黎明"},{id:177,w:"draw",z:"畫圖"},{id:178,w:"all",z:"全部"},{id:179,w:"ball",z:"球"},{id:180,w:"call",z:"打電話"},
-    {id:181,w:"fall",z:"秋天/落下"},{id:182,w:"tall",z:"高的"},{id:183,w:"sea",z:"大海"},{id:184,w:"lead",z:"領導"},{id:185,w:"read",z:"閱讀"},
+    {id:176,w:"dawn",z:"黎明"},{id:177,w:"draw",z:"畫圖"},{id:178,w:"all",z:"全部"},{id:179,w:"ball",z:"球"},{id:180,w:"call",z:"電話"},
+    {id:181,w:"fall",z:"秋天"},{id:182,w:"tall",z:"高的"},{id:183,w:"sea",z:"大海"},{id:184,w:"lead",z:"領導"},{id:185,w:"read",z:"閱讀"},
     {id:186,w:"ear",z:"耳朵"},{id:187,w:"hear",z:"聽見"},{id:188,w:"dead",z:"死亡"},{id:189,w:"head",z:"頭"},{id:190,w:"bear",z:"熊"},
     {id:191,w:"pear",z:"梨子"},{id:192,w:"wear",z:"穿戴"},{id:193,w:"bee",z:"蜜蜂"},{id:194,w:"see",z:"看見"},{id:195,w:"need",z:"需要"},
     {id:196,w:"seed",z:"種子"},{id:197,w:"week",z:"星期"},{id:198,w:"arm",z:"手臂"},{id:199,w:"art",z:"藝術"},{id:200,w:"car",z:"汽車"},
     {id:201,w:"card",z:"卡片"},{id:202,w:"far",z:"遠的"},{id:203,w:"or",z:"或者"},{id:204,w:"for",z:"為了"},{id:205,w:"fork",z:"叉子"},
-    {id:206,w:"pork",z:"豬肉"},{id:207,w:"born",z:"出生"},{id:208,w:"her",z:"她的"},{id:209,w:"over",z:"在...上方"},{id:210,w:"river",z:"河流"},
+    {id:206,w:"pork",z:"豬肉"},{id:207,w:"born",z:"出生"},{id:208,w:"her",z:"她的"},{id:209,w:"over",z:"上方"},{id:210,w:"river",z:"河流"},
     {id:211,w:"ruler",z:"尺"},{id:212,w:"order",z:"訂單"},{id:213,w:"sir",z:"先生"},{id:214,w:"bird",z:"鳥"},{id:215,w:"girl",z:"女孩"},
     {id:216,w:"first",z:"第一"},{id:217,w:"shirt",z:"襯衫"},{id:218,w:"fur",z:"毛皮"},{id:219,w:"burn",z:"燃燒"},{id:220,w:"turn",z:"轉彎"},
     {id:221,w:"surf",z:"衝浪"},{id:222,w:"hurt",z:"受傷"},{id:223,w:"yes",z:"是的"},{id:224,w:"yet",z:"尚未"},{id:225,w:"yard",z:"院子"},
     {id:226,w:"year",z:"年"},{id:227,w:"yo-yo",z:"溜溜球"},{id:228,w:"baby",z:"嬰兒"},{id:229,w:"body",z:"身體"},{id:230,w:"very",z:"非常"},
-    {id:231,w:"many",z:"許多"},{id:232,w:"tidy",z:"整潔"},{id:233,w:"fly",z:"飛/蒼蠅"},{id:234,w:"cry",z:"哭"},{id:235,w:"twenty",z:"二十"},
+    {id:231,w:"many",z:"許多"},{id:232,w:"tidy",z:"整潔"},{id:233,w:"fly",z:"蒼蠅"},{id:234,w:"cry",z:"哭"},{id:235,w:"twenty",z:"二十"},
     {id:236,w:"thirty",z:"三十"},{id:237,w:"forty",z:"四十"},{id:238,w:"fifty",z:"五十"},{id:239,w:"sixty",z:"六十"},{id:240,w:"seventy",z:"七十"},
     {id:241,w:"eighty",z:"八十"},{id:242,w:"ninety",z:"九十"},{id:243,w:"hundred",z:"百"},{id:244,w:"thousand",z:"千"},{id:245,w:"million",z:"百萬"},
     {id:246,w:"first",z:"第一"},{id:247,w:"second",z:"第二"},{id:248,w:"third",z:"第三"},{id:249,w:"fourth",z:"第四"},{id:250,w:"fifth",z:"第五"},
     {id:251,w:"sixth",z:"第六"},{id:252,w:"seventh",z:"第七"},{id:253,w:"eighth",z:"第八"},{id:254,w:"ninth",z:"第九"},{id:255,w:"tenth",z:"第十"},
-    {id:256,w:"number",z:"數字"},{id:257,w:"few",z:"少數的"},{id:258,w:"many",z:"許多的"},{id:259,w:"much",z:"許多的"},{id:260,w:"all",z:"全部的"},
-    {id:261,w:"both",z:"兩者"},{id:262,w:"some",z:"一些"},{id:263,w:"any",z:"任何的"},{id:264,w:"no",z:"不"},{id:265,w:"every",z:"每個"},
-    {id:266,w:"other",z:"其他的"},{id:267,w:"last",z:"最後的"},{id:268,w:"next",z:"下一個"},{id:269,w:"Sunday",z:"週日"},{id:270,w:"Monday",z:"週一"},
+    {id:256,w:"number",z:"數字"},{id:257,w:"few",z:"少數"},{id:258,w:"many",z:"多數"},{id:259,w:"much",z:"多數"},{id:260,w:"all",z:"全部"},
+    {id:261,w:"both",z:"兩者"},{id:262,w:"some",z:"一些"},{id:263,w:"any",z:"任何"},{id:264,w:"no",z:"不"},{id:265,w:"every",z:"每個"},
+    {id:266,w:"other",z:"其他"},{id:267,w:"last",z:"最後"},{id:268,w:"next",z:"下一個"},{id:269,w:"Sunday",z:"週日"},{id:270,w:"Monday",z:"週一"},
     {id:271,w:"Tuesday",z:"週二"},{id:272,w:"Wednesday",z:"週三"},{id:273,w:"Thursday",z:"週四"},{id:274,w:"Friday",z:"週五"},{id:275,w:"Saturday",z:"週六"},
     {id:276,w:"spring",z:"春天"},{id:277,w:"summer",z:"夏天"},{id:278,w:"fall",z:"秋天"},{id:279,w:"winter",z:"冬天"},{id:280,w:"weather",z:"天氣"},
-    {id:281,w:"hot",z:"熱的"},{id:282,w:"cold",z:"冷的"},{id:283,w:"warm",z:"溫暖的"},{id:284,w:"cool",z:"涼爽的"},{id:285,w:"rainy",z:"多雨的"},
-    {id:286,w:"sunny",z:"晴朗的"},{id:287,w:"cloudy",z:"多雲的"},{id:288,w:"windy",z:"風大的"},{id:289,w:"snowy",z:"下雪的"},{id:290,w:"dry",z:"乾燥的"},
-    {id:291,w:"wet",z:"濕的"},{id:292,w:"clear",z:"晴朗的"},{id:293,w:"dark",z:"黑暗的"},{id:294,w:"bright",z:"明亮的"},{id:295,w:"red",z:"紅色"},
-    {id:296,w:"blue",z:"藍色"},{id:297,w:"green",z:"綠色"},{id:298,w:"yellow",z:"黃色"},{id:299,w:"white",z:"白色"},{id:300,w:"black",z:"黑色"},
-    {id:301,w:"pink",z:"粉紅色"},{id:302,w:"orange",z:"橘色"},{id:303,w:"purple",z:"紫色"},{id:304,w:"brown",z:"咖啡色"},{id:305,w:"gray",z:"灰色"},
-    {id:306,w:"gold",z:"金色"},{id:307,w:"silver",z:"銀色"},{id:308,w:"color",z:"顏色"},{id:309,w:"apple",z:"蘋果"},{id:310,w:"banana",z:"香蕉"},
+    {id:281,w:"hot",z:"熱的"},{id:282,w:"cold",z:"冷的"},{id:283,w:"warm",z:"溫暖"},{id:284,w:"cool",z:"涼爽"},{id:285,w:"rainy",z:"下雨"},
+    {id:286,w:"sunny",z:"晴天"},{id:287,w:"cloudy",z:"多雲"},{id:288,w:"windy",z:"風大"},{id:289,w:"snowy",z:"下雪"},{id:290,w:"dry",z:"乾燥"},
+    {id:291,w:"wet",z:"潮濕"},{id:292,w:"clear",z:"晴朗"},{id:293,w:"dark",z:"黑暗"},{id:294,w:"bright",z:"明亮"},{id:295,w:"red",z:"紅"},
+    {id:296,w:"blue",z:"藍"},{id:297,w:"green",z:"綠"},{id:298,w:"yellow",z:"黃"},{id:299,w:"white",z:"白"},{id:300,w:"black",z:"黑"},
+    {id:301,w:"pink",z:"粉紅"},{id:302,w:"orange",z:"橘"},{id:303,w:"purple",z:"紫"},{id:304,w:"brown",z:"棕"},{id:305,w:"gray",z:"灰"},
+    {id:306,w:"gold",z:"金"},{id:307,w:"silver",z:"銀"},{id:308,w:"color",z:"顏色"},{id:309,w:"apple",z:"蘋果"},{id:310,w:"banana",z:"香蕉"},
     {id:311,w:"cherry",z:"櫻桃"}
 ];
 
-// --- 系統變數 ---
+// --- 音效生成器 (不需外部檔案) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep(type) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if(type === 'win') {
+        osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+    } else {
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime); // 低音
+        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+    }
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+}
+
+// --- 邏輯功能 ---
 let user = "", coins = 0, currentList = [], qTarget = null, picked = [];
 const synth = window.speechSynthesis;
 
@@ -155,7 +174,7 @@ window.onload = () => {
 };
 
 function login() {
-    let n = prompt("請輸入班級姓名 (例如 301王小明)：");
+    let n = prompt("輸入班級姓名：");
     if(n) {
         user = n;
         document.getElementById('user-name').innerText = user;
@@ -169,6 +188,7 @@ function updateCoins(v) {
     coins += v; if(coins < 0) coins = 0;
     document.getElementById('coin-val').innerText = coins;
     if(v !== 0) {
+        playBeep(v > 0 ? 'win' : 'lose'); // 播放音效
         const p = document.createElement('div');
         p.className = 'coin-pop'; p.innerText = (v>0?"+":"")+v;
         p.style.color = v>0?"var(--ok)":"var(--err)";
@@ -199,10 +219,6 @@ function initGame() {
     const dy = parseInt(document.getElementById('dy-select').value);
     const start = (wk-1)*30 + (dy-1)*10 + 1;
     currentList = DB.filter(x => x.id >= start && x.id < start + 10);
-    if(currentList.length === 0) {
-        alert("這部分目前沒有單字喔，請選擇其他週次！");
-        return;
-    }
     switchMode('match');
 }
 
@@ -215,8 +231,7 @@ function switchMode(m) {
 function speak(t) { 
     synth.cancel(); 
     const u = new SpeechSynthesisUtterance(t); 
-    u.lang='en-US'; 
-    u.rate=0.7; // 稍微放慢速度讓學生聽清楚
+    u.lang='en-US'; u.rate=0.7; 
     synth.speak(u); 
 }
 
@@ -252,10 +267,8 @@ function renderQuiz() {
     document.getElementById('q-msg').innerText = "";
     qTarget = currentList[Math.floor(Math.random()*currentList.length)];
     let opts = [qTarget];
-    // 隨機選三個錯誤選項
     let others = DB.filter(x => x.id !== qTarget.id).sort(()=>Math.random()-0.5);
     opts.push(others[0], others[1], others[2]);
-    
     opts.sort(()=>Math.random()-0.5);
     const box = document.getElementById('q-opts'); box.innerHTML = "";
     opts.forEach(o => {
@@ -264,11 +277,10 @@ function renderQuiz() {
         b.onclick = () => {
             if(o.id === qTarget.id) {
                 b.classList.add('win'); updateCoins(20);
-                document.getElementById('q-msg').innerText = "太棒了！答對了";
+                document.getElementById('q-msg').innerText = "Correct!";
                 setTimeout(renderQuiz, 1000);
             } else {
                 b.classList.add('lose'); updateCoins(-10);
-                document.getElementById('q-msg').innerText = "再試一次！";
                 setTimeout(()=>b.classList.remove('lose'), 800);
             }
         };
